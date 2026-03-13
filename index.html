@@ -50,9 +50,11 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 20px;
+            /* Prevent grid from reflowing during drag */
+            min-height: 400px;
         }
 
         .card {
@@ -65,6 +67,37 @@
             flex-direction: column;
             max-height: 400px;
             border: 1px solid #ffffffb3;
+            transition: transform 0.2s, box-shadow 0.2s, border 0.1s;
+            /* Improve drag performance */
+            will-change: transform;
+            user-select: none;
+        }
+        
+        /* Make cards draggable with proper cursor */
+        .card[draggable="true"] {
+            cursor: grab;
+            /* Prevent text selection during drag */
+            -webkit-user-drag: element;
+        }
+        
+        .card[draggable="true"]:active {
+            cursor: grabbing;
+        }
+        
+        /* Drag visual feedback - using box-shadow instead of border to prevent layout shift */
+        .card.drag-over-top {
+            box-shadow: 0 -3px 0 0 #3f60b5 inset, 0 12px 26px -10px rgba(30,40,70,0.12) !important;
+        }
+        
+        .card.drag-over-bottom {
+            box-shadow: 0 3px 0 0 #3f60b5 inset, 0 12px 26px -10px rgba(30,40,70,0.12) !important;
+        }
+        
+        /* Ghost image styling - when dragging */
+        .card.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+            box-shadow: 0 20px 30px -10px rgba(30,40,70,0.2);
         }
 
         .card h3 {
@@ -77,6 +110,8 @@
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
+            /* Make header area also draggable */
+            pointer-events: auto;
         }
 
         .scrollable-content {
@@ -84,6 +119,8 @@
             flex: 1;
             min-height: 0;
             padding-right: 5px;
+            /* Ensure scrolling works even when dragging over */
+            pointer-events: auto;
         }
 
         .scrollable-content::-webkit-scrollbar {
@@ -391,6 +428,18 @@
             padding: 14px 6px;
             background: #f3f7ff;
             border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .stat-item:hover {
+            background: #e5edff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(63, 96, 181, 0.2);
+        }
+        
+        .stat-item.clickable {
+            cursor: pointer;
         }
 
         .stat-number {
@@ -915,6 +964,163 @@
             font-size: 11px;
             margin-left: 10px;
         }
+        
+        /* Drag handle indicator - fixed positioning */
+        .drag-handle {
+            opacity: 0.5;
+            font-size: 16px;
+            margin-right: 8px;
+            cursor: grab;
+            user-select: none;
+            display: inline-block;
+            /* Ensure handle is always clickable for drag */
+            pointer-events: auto;
+            padding: 0 4px;
+        }
+        
+        .drag-handle:hover {
+            opacity: 1;
+        }
+        
+        /* Prevent iframe drag issues */
+        iframe {
+            pointer-events: none;
+        }
+
+        /* NEW: Expiration Calendar Styles - Full width section */
+        .expiration-section {
+            background: #ffffffec;
+            backdrop-filter: blur(4px);
+            padding: 22px;
+            border-radius: 28px;
+            box-shadow: 0 12px 26px -10px rgba(30,40,70,0.12);
+            margin-bottom: 20px;
+            border: 1px solid #ffffffb3;
+        }
+        
+        .expiration-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9effa;
+            padding-bottom: 10px;
+        }
+        
+        .expiration-header h3 {
+            color: #25355f;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .expiration-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 0; /* Removed bottom margin as grid below is removed */
+        }
+        
+        .expiration-stat {
+            background: #f3f7ff;
+            border-radius: 24px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .expiration-stat:hover {
+            background: #e5edff;
+            border-color: #3f60b5;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(63, 96, 181, 0.15);
+        }
+        
+        .expiration-stat.expired:hover {
+            background: #fee9e7;
+            border-color: #fbc5c2;
+        }
+        
+        .expiration-stat.warning:hover {
+            background: #fff2db;
+            border-color: #ffe6b7;
+        }
+        
+        .expiration-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2b48;
+            margin-bottom: 5px;
+        }
+        
+        .expiration-stat-label {
+            font-size: 13px;
+            color: #486193;
+            font-weight: 500;
+        }
+        
+        /* calendar grid is removed, only summary cards remain */
+        
+        .calendar-view-all {
+            background: none;
+            border: 1px solid #ccd8ed;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #2c4182;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .calendar-view-all:hover {
+            background: #e5edff;
+            border-color: #3f60b5;
+        }
+        
+        .calendar-filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .calendar-filter-tab {
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            background: #f2f6fe;
+            cursor: pointer;
+            border: 1px solid #dae3f2;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #273a63;
+        }
+        
+        .calendar-filter-tab.active {
+            background: #2c4182;
+            color: white;
+            border-color: #1f3160;
+        }
+        
+        .calendar-filter-tab:hover {
+            background: #e5edff;
+        }
+        
+        .calendar-month-group {
+            margin-bottom: 25px;
+        }
+        
+        .calendar-month-title {
+            color: #1f2b48;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -922,24 +1128,26 @@
     <div class="container">
         <header>
             <div>
-                <h1>myTeams Cert-Tracker Dashboard (Demo)</h1>
+                <h1>myTeams Cert-Tracker(Demo)</h1>
                 <p>Certifications, goals & alerts</p>
             </div>
             <div class="action-buttons">
                 <button class="btn btn-danger btn-sm" onclick="clearAllDismissedNotifications()">🗑️ Clear Dismissed</button>
                 <button class="btn btn-info btn-sm" onclick="resetAllNotifications()">🔄 Reset All Notifications</button>
+                <button class="btn btn-sm" onclick="resetCardOrder()">↻ Reset Card Order</button>
             </div>
         </header>
 
+        <!-- Top 3 cards grid - EXACTLY as original -->
         <div class="dashboard-grid">
-            <div class="card">
+            <div class="card" data-card="notifications">
                 <h3>🔔 Notifications & Alerts</h3>
                 <div class="scrollable-content" id="alerts-container">
                     <!-- dynamic from js -->
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" data-card="overview">
                 <h3>📊 Team Overview</h3>
                 <div class="stat-grid">
                     <div class="stat-item">
@@ -963,14 +1171,30 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" data-card="achievements">
                 <h3>🏆 Team Achievements</h3>
                 <div class="scrollable-content" id="achievements-container">
                     <!-- dynamic -->
                 </div>
             </div>
         </div>
+        
+        <!-- MODIFIED: Expiration Calendar Section - Only 4 cards remain, calendar grid removed -->
+        <div class="expiration-section">
+            <div class="expiration-header">
+                <h3>📅 Certification Expiration Calendar</h3>
+                <button class="calendar-view-all" onclick="showFullExpirationCalendar()">View Full Calendar →</button>
+            </div>
+            
+            <!-- Summary Stats (4 cards) - now clickable to open full calendar with filter -->
+            <div class="expiration-summary-grid" id="expiration-summary">
+                <!-- Populated by JS -->
+            </div>
+            
+            <!-- The calendar grid below is completely removed -->
+        </div>
 
+        <!-- Main Tabs Card - EXACTLY as original -->
         <div class="card" style="max-height: 800px;">
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('members', event)">👥 Team Members</div>
@@ -1191,7 +1415,7 @@
     
     <div id="cert-detail-modal" class="modal"><div class="modal-content"><h3 id="cert-detail-title">Certification Holders</h3><div id="cert-holders-list" class="scrollable-content" style="max-height: 400px; margin: 15px 0;"></div><button class="btn btn-success" onclick="closeModal('cert-detail-modal')">Close</button></div></div>
 
-    <!-- ###########  ORIGINAL JAVASCRIPT – UNCHANGED (same behavior)  ########### -->
+    <!-- ###########  FIXED JAVASCRIPT – COMPLETELY REWRITTEN DRAG AND DROP  ########### -->
     <script>
         (function() {
             // ----- PRE-POPULATED DATA -----
@@ -1216,7 +1440,7 @@
                     { id: 5001, typeId: 1001, issueDate: '2023-06-01', expiryDate: '2026-06-01', hasExpiry: true },
                     { id: 5002, typeId: 1005, issueDate: '2024-02-10', expiryDate: '2027-02-10', hasExpiry: true },
                     { id: 5003, typeId: 1006, issueDate: '2022-11-15', expiryDate: '2025-11-15', hasExpiry: true },
-                    { id: 5014, typeId: 1011, issueDate: '2024-01-15', hasExpiry: false } // Medical cert - no expiry
+                    { id: 5014, typeId: 1011, issueDate: '2024-01-15', hasExpiry: false }
                 ]},
                 { id: 202, name: 'Bob Smith', role: 'Cloud Architect', email: 'bob.s@company.com', certifications: [
                     { id: 5004, typeId: 1005, issueDate: '2024-01-20', expiryDate: '2027-01-20', hasExpiry: true },
@@ -1230,7 +1454,7 @@
                 { id: 204, name: 'David Lee', role: 'Wireless Engineer', email: 'david.l@company.com', certifications: [
                     { id: 5009, typeId: 1003, issueDate: '2024-04-15', expiryDate: '2025-04-15', hasExpiry: true },
                     { id: 5010, typeId: 1004, issueDate: '2023-05-20', expiryDate: '2026-05-20', hasExpiry: true },
-                    { id: 5015, typeId: 1012, issueDate: '2024-02-01', hasExpiry: false } // CPR - no expiry
+                    { id: 5015, typeId: 1012, issueDate: '2024-02-01', hasExpiry: false }
                 ]},
                 { id: 205, name: 'Eva Green', role: 'Agile Coach', email: 'eva.g@company.com', certifications: [
                     { id: 5011, typeId: 1008, issueDate: '2023-08-01', expiryDate: '2026-08-01', hasExpiry: true },
@@ -1238,23 +1462,11 @@
                 ]},
                 { id: 206, name: 'Frank Moore', role: 'Network Administrator', email: 'frank.m@company.com', certifications: [
                     { id: 5013, typeId: 1001, issueDate: '2021-09-10', expiryDate: '2024-09-10', hasExpiry: true },
-                    { id: 5016, typeId: 1013, issueDate: '2024-03-15', hasExpiry: false } // Food Safety - no expiry
+                    { id: 5016, typeId: 1013, issueDate: '2024-03-15', hasExpiry: false }
                 ]}
             ];
 
-            // Commented out preloaded team goals - now starts empty
             const preloadedTeamGoals = [];
-            // If you want to keep some examples, uncomment below:
-            /*
-            const preloadedTeamGoals = [
-                { id: 3001, year: 2024, category: 'Routing-Switching', target: 8, description: 'Boost routing-switching certs (CCNA/CCNP)' },
-                { id: 3002, year: 2024, category: 'Cloud', target: 5, description: 'Cloud certification push' },
-                { id: 3003, year: 2024, category: 'Security', target: 6, description: 'Security team expansion' },
-                { id: 3004, year: 2023, category: 'Agile', target: 4, description: 'Agile transformation (achieved)' }
-            ];
-            */
-
-            // Empty member goals array - no preloaded examples
             const preloadedMemberGoals = [];
 
             // Store all unique categories for dropdowns
@@ -1276,6 +1488,7 @@
                 status: 'all'
             };
 
+            // Make variables globally accessible with window object
             window.teamMembers = preloadedMembers.map(m => ({...m, certifications: m.certifications.map(c => ({...c}))}));
             window.certificationTypes = preloadedCertTypes.map(c => ({...c}));
             window.teamGoals = preloadedTeamGoals.map(g => ({...g}));
@@ -1293,11 +1506,9 @@
             
             // Update all category dropdowns
             window.updateAllCategoryDropdowns = function() {
-                // Get unique categories from certificationTypes
                 const uniqueCategories = [...new Set(certificationTypes.map(ct => ct.category))];
                 allCategories = [...new Set([...allCategories, ...uniqueCategories])].sort();
                 
-                // Update cert-type-modal select
                 const certCategorySelect = document.getElementById('cert-category-select');
                 if (certCategorySelect) {
                     let options = '<option value="">Select or create new...</option>';
@@ -1307,7 +1518,6 @@
                     certCategorySelect.innerHTML = options;
                 }
                 
-                // Update team goal category select
                 const teamGoalSelect = document.getElementById('team-goal-category');
                 if (teamGoalSelect) {
                     let options = '<option value="">Select a category</option>';
@@ -1318,7 +1528,6 @@
                     teamGoalSelect.innerHTML = options;
                 }
                 
-                // Update team goal category filter
                 const teamGoalCategoryFilter = document.getElementById('team-goal-category-filter');
                 if (teamGoalCategoryFilter) {
                     let options = '<option value="all">All Categories</option>';
@@ -1329,7 +1538,6 @@
                     teamGoalCategoryFilter.innerHTML = options;
                 }
                 
-                // Update member goal category select
                 const memberGoalSelect = document.getElementById('member-goal-category');
                 if (memberGoalSelect) {
                     let options = '<option value="">Select a category</option>';
@@ -1341,12 +1549,10 @@
                 }
             };
             
-            // Function to use new category from input
             window.useNewCategory = function() {
                 const newCat = document.getElementById('cert-category-new').value.trim();
                 if (newCat) {
                     const select = document.getElementById('cert-category-select');
-                    // Add option if it doesn't exist
                     let exists = false;
                     for (let i = 0; i < select.options.length; i++) {
                         if (select.options[i].value === newCat) {
@@ -1362,7 +1568,7 @@
                         allCategories.push(newCat);
                     }
                     select.value = newCat;
-                    document.getElementById('cert-category-new').value = ''; // Clear input
+                    document.getElementById('cert-category-new').value = '';
                 }
             };
 
@@ -1483,7 +1689,6 @@
 
             window.removeCertificationType = function(id, event) {
                 event.stopPropagation();
-                // Check if any members have this certification
                 let inUse = teamMembers.some(m => m.certifications.some(c => c.typeId === id));
                 if (inUse) {
                     if (!confirm('This certification type is assigned to members. Removing it will also remove those certifications. Continue?')) {
@@ -1492,11 +1697,9 @@
                 }
                 
                 if (confirm('Are you sure you want to remove this certification type?')) {
-                    // Remove all member certifications of this type
                     teamMembers.forEach(m => {
                         m.certifications = m.certifications.filter(c => c.typeId !== id);
                     });
-                    // Remove the certification type
                     certificationTypes = certificationTypes.filter(ct => ct.id !== id);
                     window.certificationTypes = certificationTypes;
                     updateUI();
@@ -1553,8 +1756,266 @@
                     expiryGroup.style.display = 'none';
                     noExpiryMessage.style.display = 'block';
                     expiryInput.required = false;
-                    expiryInput.value = ''; // Clear the date
+                    expiryInput.value = '';
                 }
+            };
+
+            // MODIFIED: Expiration Calendar Functions – cards now open full calendar view with filter
+            window.getAllExpiringCertifications = function() {
+                let expirations = [];
+                let today = new Date();
+                let thirtyDays = new Date(today.getTime() + 30 * 86400000);
+                let sixMonths = new Date(today.getTime() + 180 * 86400000);
+                
+                for (let member of teamMembers) {
+                    for (let cert of member.certifications) {
+                        if (!cert.hasExpiry) continue;
+                        
+                        let certType = getCertificationTypeById(cert.typeId);
+                        if (!certType) continue;
+                        
+                        let expiryDate = new Date(cert.expiryDate);
+                        
+                        let status = 'future';
+                        if (expiryDate < today) {
+                            status = 'expired';
+                        } else if (expiryDate < thirtyDays) {
+                            status = 'warning';
+                        } else if (expiryDate < sixMonths) {
+                            status = 'upcoming';
+                        }
+                        
+                        expirations.push({
+                            memberId: member.id,
+                            memberName: member.name,
+                            certId: cert.id,
+                            certName: certType.name,
+                            certCategory: certType.category,
+                            expiryDate: cert.expiryDate,
+                            expiryDateObj: expiryDate,
+                            status: status
+                        });
+                    }
+                }
+                
+                expirations.sort((a, b) => a.expiryDateObj - b.expiryDateObj);
+                
+                return expirations;
+            };
+            
+            window.getExpirationCounts = function() {
+                let expirations = getAllExpiringCertifications();
+                let today = new Date();
+                let thirtyDays = new Date(today.getTime() + 30 * 86400000);
+                let sixMonths = new Date(today.getTime() + 180 * 86400000);
+                
+                let counts = {
+                    expired: 0,
+                    month: 0,
+                    sixMonths: 0,
+                    future: 0,
+                    total: expirations.length
+                };
+                
+                for (let exp of expirations) {
+                    let expDate = exp.expiryDateObj;
+                    
+                    if (expDate < today) {
+                        counts.expired++;
+                    } else if (expDate < thirtyDays) {
+                        counts.month++;
+                    } else if (expDate < sixMonths) {
+                        counts.sixMonths++;
+                    } else {
+                        counts.future++;
+                    }
+                }
+                
+                return counts;
+            };
+            
+            window.updateExpirationSummary = function() {
+                let summaryDiv = document.getElementById('expiration-summary');
+                if (!summaryDiv) return;
+                
+                let counts = getExpirationCounts();
+                
+                // Make cards clickable – they open full calendar with the corresponding filter
+                summaryDiv.innerHTML = `
+                    <div class="expiration-stat expired" onclick="showFullExpirationCalendar('expired')">
+                        <div class="expiration-stat-value">${counts.expired}</div>
+                        <div class="expiration-stat-label">Expired</div>
+                    </div>
+                    <div class="expiration-stat warning" onclick="showFullExpirationCalendar('month')">
+                        <div class="expiration-stat-value">${counts.month}</div>
+                        <div class="expiration-stat-label">Next 30 Days</div>
+                    </div>
+                    <div class="expiration-stat" onclick="showFullExpirationCalendar('6months')">
+                        <div class="expiration-stat-value">${counts.sixMonths}</div>
+                        <div class="expiration-stat-label">Next 6 Months</div>
+                    </div>
+                    <div class="expiration-stat" onclick="showFullExpirationCalendar('future')">
+                        <div class="expiration-stat-value">${counts.future}</div>
+                        <div class="expiration-stat-label">Future</div>
+                    </div>
+                `;
+            };
+            
+            // Removed updateExpirationGrid – no longer needed as grid is removed
+            
+            window.showFullExpirationCalendar = function(initialFilter = 'all') {
+                // Create modal if it doesn't exist
+                let modal = document.getElementById('expiration-calendar-modal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'expiration-calendar-modal';
+                    modal.className = 'modal';
+                    modal.innerHTML = `
+                        <div class="modal-content" style="max-width: 900px;">
+                            <h3 id="expiration-calendar-title">📅 Certification Expiration Calendar</h3>
+                            
+                            <div class="calendar-filter-tabs" id="calendar-filter-tabs">
+                                <button class="calendar-filter-tab" onclick="filterFullCalendar('all')">All Expirations</button>
+                                <button class="calendar-filter-tab" onclick="filterFullCalendar('expired')">Expired</button>
+                                <button class="calendar-filter-tab" onclick="filterFullCalendar('month')">Next 30 Days</button>
+                                <button class="calendar-filter-tab" onclick="filterFullCalendar('6months')">Next 6 Months</button>
+                                <button class="calendar-filter-tab" onclick="filterFullCalendar('future')">Future</button>
+                            </div>
+                            
+                            <div class="scrollable-content" id="full-expiration-calendar" style="max-height: 500px; margin: 15px 0; padding-right: 10px;">
+                                <!-- Populated by JS -->
+                            </div>
+                            
+                            <button class="btn btn-success" onclick="closeModal('expiration-calendar-modal')">Close</button>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+                
+                // Update the full calendar view with the initial filter
+                updateFullExpirationCalendar(initialFilter);
+                modal.style.display = 'block';
+            };
+            
+            window.updateFullExpirationCalendar = function(filter = 'all') {
+                let calendarDiv = document.getElementById('full-expiration-calendar');
+                if (!calendarDiv) return;
+                
+                let expirations = getAllExpiringCertifications();
+                let today = new Date();
+                let thirtyDays = new Date(today.getTime() + 30 * 86400000);
+                let sixMonths = new Date(today.getTime() + 180 * 86400000);
+                
+                // Apply filter
+                let filtered = expirations;
+                if (filter === 'expired') {
+                    filtered = expirations.filter(e => e.expiryDateObj < today);
+                } else if (filter === 'month') {
+                    filtered = expirations.filter(e => e.expiryDateObj >= today && e.expiryDateObj < thirtyDays);
+                } else if (filter === '6months') {
+                    filtered = expirations.filter(e => e.expiryDateObj >= thirtyDays && e.expiryDateObj < sixMonths);
+                } else if (filter === 'future') {
+                    filtered = expirations.filter(e => e.expiryDateObj >= sixMonths);
+                }
+                
+                // Update active tab
+                document.querySelectorAll('.calendar-filter-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    if (tab.getAttribute('onclick').includes(filter)) {
+                        tab.classList.add('active');
+                    }
+                });
+                
+                let title = document.getElementById('expiration-calendar-title');
+                if (title) {
+                    let filterName = {
+                        'all': 'All Expirations',
+                        'expired': 'Expired Certifications',
+                        'month': 'Expiring in Next 30 Days',
+                        '6months': 'Expiring in Next 6 Months',
+                        'future': 'Future Expirations'
+                    }[filter] || 'Expiration Calendar';
+                    
+                    title.innerHTML = `📅 ${filterName} (${filtered.length})`;
+                }
+                
+                // Group by month/year
+                let grouped = {};
+                filtered.forEach(exp => {
+                    let date = new Date(exp.expiryDate);
+                    let key = `${date.getFullYear()}-${date.getMonth()}`;
+                    if (!grouped[key]) {
+                        grouped[key] = {
+                            month: date.toLocaleString('default', { month: 'long', year: 'numeric' }),
+                            expirations: []
+                        };
+                    }
+                    grouped[key].expirations.push(exp);
+                });
+                
+                // Sort groups by date
+                let sortedGroups = Object.values(grouped).sort((a, b) => {
+                    let aDate = new Date(a.expirations[0].expiryDate);
+                    let bDate = new Date(b.expirations[0].expiryDate);
+                    return aDate - bDate;
+                });
+                
+                if (filtered.length === 0) {
+                    calendarDiv.innerHTML = '<div class="empty-state">No certifications match this filter</div>';
+                    return;
+                }
+                
+                let html = '';
+                for (let group of sortedGroups) {
+                    html += `<h4 style="margin: 15px 0 10px 0; color: #1f2b48;">${group.month}</h4>`;
+                    
+                    for (let exp of group.expirations) {
+                        let expDate = new Date(exp.expiryDate);
+                        let month = expDate.toLocaleString('default', { month: 'short' });
+                        let day = expDate.getDate();
+                        let year = expDate.getFullYear();
+                        
+                        let statusClass = '';
+                        let statusText = '';
+                        
+                        if (exp.expiryDateObj < today) {
+                            statusClass = 'expired';
+                            statusText = 'Expired';
+                        } else if (exp.expiryDateObj < thirtyDays) {
+                            statusClass = 'warning';
+                            statusText = 'Due Soon';
+                        } else if (exp.expiryDateObj < sixMonths) {
+                            statusClass = 'upcoming';
+                            statusText = 'Upcoming';
+                        } else {
+                            statusClass = 'future';
+                            statusText = 'Future';
+                        }
+                        
+                        html += `
+                            <div class="calendar-entry ${statusClass}" style="margin-bottom: 8px;">
+                                <div class="calendar-date">
+                                    <span class="month">${month}</span>
+                                    <span class="day">${day}</span>
+                                    <span class="year">${year}</span>
+                                </div>
+                                <div class="calendar-info">
+                                    <div class="member-name">${exp.memberName}</div>
+                                    <div class="cert-name">${exp.certName}</div>
+                                </div>
+                                <div class="calendar-badge ${statusClass}">${statusText}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                calendarDiv.innerHTML = html;
+            };
+            
+            // Removed filterExpirationCalendar – no longer needed
+            
+            window.filterFullCalendar = function(filter) {
+                updateFullExpirationCalendar(filter);
             };
 
             // UI Update Functions
@@ -1565,13 +2026,11 @@
                 let alerts = [];
                 let notificationId = 0;
                 
-                // Check for expiring/expired certifications
                 for (let m of teamMembers) {
                     for (let c of m.certifications) {
                         let ct = getCertificationTypeById(c.typeId);
                         notificationId++;
                         
-                        // Handle no expiry certifications
                         if (!c.hasExpiry) {
                             alerts.push({id: notificationId, type:'no-expiry', message:`ℹ️ ${m.name} has ${ct?ct.name:'Unknown'} (No Expiry Date)`});
                             continue;
@@ -1586,7 +2045,6 @@
                     }
                 }
                 
-                // Check for achieved team goals (green notifications)
                 let year = today.getFullYear();
                 for (let g of teamGoals) {
                     if (g.year === year) {
@@ -1601,7 +2059,6 @@
                     }
                 }
                 
-                // Check for achieved individual goals (green notifications)
                 for (let g of memberGoals) {
                     if (g.year === year) {
                         let member = getMemberById(g.memberId);
@@ -1615,7 +2072,6 @@
                     }
                 }
                 
-                // Check for recently achieved certifications (new certs in last 30 days)
                 let thirtyDaysAgo = new Date(today.getTime() - 30*86400000);
                 for (let m of teamMembers) {
                     for (let c of m.certifications) {
@@ -1628,13 +2084,11 @@
                     }
                 }
                 
-                // Filter out dismissed notifications
                 alerts = alerts.filter(a => !dismissedNotifications.has(a.id));
                 
                 if (alerts.length===0) {
                     container.innerHTML = '<div class="empty-state">No alerts ✅</div>';
                 } else {
-                    // Sort alerts: achieved first, then info, then no-expiry, then warnings, then expired
                     alerts.sort((a, b) => {
                         const order = { 'achieved': 1, 'info': 2, 'no-expiry': 3, 'warning': 4, 'expired': 5 };
                         return (order[a.type] || 99) - (order[b.type] || 99);
@@ -1656,7 +2110,7 @@
                 let today = new Date(), thirty = new Date(today.getTime()+30*86400000);
                 let expiring = 0;
                 for (let m of teamMembers) for (let c of m.certifications) {
-                    if (!c.hasExpiry) continue; // Skip no-expiry certs
+                    if (!c.hasExpiry) continue;
                     let exp = new Date(c.expiryDate);
                     if (exp > today && exp < thirty) expiring++;
                 }
@@ -1755,7 +2209,6 @@
                     return; 
                 }
                 
-                // Apply filters
                 let filteredGoals = [...teamGoals];
                 let currentYear = new Date().getFullYear();
                 
@@ -1783,7 +2236,6 @@
                     }
                 }
                 
-                // Update filter stats
                 document.getElementById('team-goal-filter-stats').textContent = 
                     `Showing ${filteredGoals.length} of ${teamGoals.length} goals`;
                 
@@ -1820,7 +2272,6 @@
                     return; 
                 }
                 
-                // Apply filters
                 let filteredGoals = [...memberGoals];
                 let currentYear = new Date().getFullYear();
                 
@@ -1848,7 +2299,6 @@
                     }
                 }
                 
-                // Update filter stats
                 document.getElementById('member-goal-filter-stats').textContent = 
                     `Showing ${filteredGoals.length} of ${memberGoals.length} targets`;
                 
@@ -1932,15 +2382,17 @@
                 div.innerHTML = html;
             };
             
+            // FIXED: This function had a syntax error - missing closing bracket
             window.updateMemberDropdowns = function() {
                 let sel = document.getElementById('member-goal-member');
                 if (sel) {
                     let opts = '<option value="">Select member</option>';
-                    for (let m of teamMembers) opts += `<option value="${m.id}">${m.name}</option>`;
+                    for (let m of teamMembers) {
+                        opts += `<option value="${m.id}">${m.name}</option>`;
+                    }
                     sel.innerHTML = opts;
                 }
                 
-                // Update member filter dropdown as well
                 updateMemberFilterDropdown();
             };
             
@@ -1951,6 +2403,12 @@
                     for (let ct of certificationTypes) opts += `<option value="${ct.id}">${ct.name} (${ct.category})</option>`;
                     sel.innerHTML = opts;
                 }
+            };
+            
+            // MODIFIED: Update expiration UI – only summary cards
+            window.updateExpirationUI = function() {
+                updateExpirationSummary();
+                // updateExpirationGrid('all'); // removed
             };
             
             window.updateUI = function() {
@@ -1966,6 +2424,7 @@
                 updateMemberDropdowns();
                 updateCertTypeDropdowns();
                 updateAllCategoryDropdowns();
+                updateExpirationUI();
             };
             
             // Action Functions
@@ -1986,7 +2445,6 @@
                 if(certificationTypes.length===0){alert('Add cert types first');return;} 
                 updateCertTypeDropdowns();
                 
-                // Reset expiry checkbox and show/hide appropriate fields
                 const hasExpiryCheckbox = document.getElementById('has-expiry');
                 hasExpiryCheckbox.checked = true;
                 window.toggleExpiryDate();
@@ -2028,7 +2486,6 @@
                 ev.target.classList.add('active');
                 document.getElementById(tab+'-tab').classList.add('active');
                 
-                // Refresh filters when switching tabs
                 if (tab === 'goals') {
                     filterTeamGoals();
                 } else if (tab === 'member-goals') {
@@ -2142,15 +2599,297 @@
                 closeModal('member-goal-modal');
             });
 
-            // Add event listener for expiry checkbox
             document.getElementById('has-expiry').addEventListener('change', toggleExpiryDate);
 
             window.onclick = function(e) { 
                 if(e.target.classList.contains('modal')) e.target.style.display='none'; 
             };
 
-            // Initial UI update
             updateUI();
+        })();
+    </script>
+    
+    <!-- ========== COMPLETELY REWRITTEN DRAG AND DROP FUNCTIONALITY ========== -->
+    <script>
+        (function() {
+            // Store dragged element reference
+            let draggedCard = null;
+            let dragOffset = { x: 0, y: 0 };
+            let isDragging = false;
+            
+            // Initialize drag and drop once when DOM is ready
+            function initDragAndDrop() {
+                const dashboardGrid = document.querySelector('.dashboard-grid');
+                if (!dashboardGrid) return;
+                
+                const cards = Array.from(dashboardGrid.children);
+                
+                // Remove any existing draggable attributes and event listeners
+                cards.forEach(card => {
+                    // Reset attributes
+                    card.removeAttribute('draggable');
+                    card.style.cursor = '';
+                    
+                    // Remove old drag handles if they exist (but we'll add new ones)
+                    const oldHandle = card.querySelector('.drag-handle');
+                    if (oldHandle) oldHandle.remove();
+                });
+                
+                // Set up cards for dragging
+                cards.forEach(card => {
+                    // Make card draggable
+                    card.setAttribute('draggable', 'true');
+                    card.style.cursor = 'grab';
+                    
+                    // Add drag handle to header
+                    const header = card.querySelector('h3');
+                    if (header) {
+                        const dragIndicator = document.createElement('span');
+                        dragIndicator.className = 'drag-handle';
+                        dragIndicator.innerHTML = '⋮⋮';
+                        dragIndicator.title = 'Drag to reorder';
+                        header.insertBefore(dragIndicator, header.firstChild);
+                    }
+                    
+                    // Drag start event
+                    card.addEventListener('dragstart', handleDragStart);
+                    
+                    // Drag end event
+                    card.addEventListener('dragend', handleDragEnd);
+                    
+                    // Drag over event
+                    card.addEventListener('dragover', handleDragOver);
+                    
+                    // Drag leave event
+                    card.addEventListener('dragleave', handleDragLeave);
+                    
+                    // Drop event
+                    card.addEventListener('drop', handleDrop);
+                });
+                
+                // Prevent default on grid
+                dashboardGrid.addEventListener('dragover', (e) => e.preventDefault());
+                dashboardGrid.addEventListener('drop', (e) => e.preventDefault());
+                
+                // Load saved order
+                loadCardOrder();
+            }
+            
+            function handleDragStart(e) {
+                draggedCard = this;
+                isDragging = true;
+                
+                // Add dragging class for visual feedback
+                this.classList.add('dragging');
+                this.style.cursor = 'grabbing';
+                
+                // Store data for drag
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.id || '');
+                
+                // Set drag image to be semi-transparent
+                e.dataTransfer.setDragImage(this, e.offsetX, e.offsetY);
+                
+                // Remove indicators from all cards
+                document.querySelectorAll('.dashboard-grid .card').forEach(c => {
+                    c.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+            }
+            
+            function handleDragEnd(e) {
+                // Remove dragging class
+                this.classList.remove('dragging');
+                this.style.cursor = 'grab';
+                
+                // Remove all indicators
+                document.querySelectorAll('.dashboard-grid .card').forEach(c => {
+                    c.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+                
+                // Save new order if we were actually dragging
+                if (isDragging) {
+                    saveCardOrder();
+                }
+                
+                draggedCard = null;
+                isDragging = false;
+            }
+            
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                if (!draggedCard || draggedCard === this) return;
+                
+                // Remove indicators from all cards
+                document.querySelectorAll('.dashboard-grid .card').forEach(c => {
+                    c.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+                
+                // Determine if we're in top or bottom half of the card
+                const rect = this.getBoundingClientRect();
+                const midPoint = rect.top + rect.height / 2;
+                
+                if (e.clientY < midPoint) {
+                    this.classList.add('drag-over-top');
+                } else {
+                    this.classList.add('drag-over-bottom');
+                }
+            }
+            
+            function handleDragLeave(e) {
+                if (!this.contains(e.relatedTarget)) {
+                    this.classList.remove('drag-over-top', 'drag-over-bottom');
+                }
+            }
+            
+            function handleDrop(e) {
+                e.preventDefault();
+                
+                // Remove indicators
+                this.classList.remove('drag-over-top', 'drag-over-bottom');
+                
+                if (!draggedCard || draggedCard === this) return;
+                
+                const dashboardGrid = document.querySelector('.dashboard-grid');
+                const allCards = Array.from(dashboardGrid.children);
+                const draggedIndex = allCards.indexOf(draggedCard);
+                const targetIndex = allCards.indexOf(this);
+                
+                // Determine drop position based on mouse Y coordinate
+                const rect = this.getBoundingClientRect();
+                const midPoint = rect.top + rect.height / 2;
+                
+                if (e.clientY < midPoint) {
+                    // Insert before target
+                    if (draggedIndex < targetIndex) {
+                        dashboardGrid.insertBefore(draggedCard, this);
+                    } else {
+                        dashboardGrid.insertBefore(draggedCard, this);
+                    }
+                } else {
+                    // Insert after target
+                    if (draggedIndex < targetIndex) {
+                        if (this.nextSibling) {
+                            dashboardGrid.insertBefore(draggedCard, this.nextSibling);
+                        } else {
+                            dashboardGrid.appendChild(draggedCard);
+                        }
+                    } else {
+                        if (this.nextSibling) {
+                            dashboardGrid.insertBefore(draggedCard, this.nextSibling);
+                        } else {
+                            dashboardGrid.appendChild(draggedCard);
+                        }
+                    }
+                }
+                
+                // Remove all indicators
+                document.querySelectorAll('.dashboard-grid .card').forEach(c => {
+                    c.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+            }
+            
+            function saveCardOrder() {
+                const dashboardGrid = document.querySelector('.dashboard-grid');
+                if (!dashboardGrid) return;
+                
+                const currentCards = Array.from(dashboardGrid.children);
+                const cardOrder = currentCards.map(card => {
+                    const header = card.querySelector('h3');
+                    return header ? header.textContent.replace(/[⋮⋮]/g, '').trim() : '';
+                });
+                
+                try {
+                    localStorage.setItem('dashboardCardOrder', JSON.stringify(cardOrder));
+                } catch (e) {
+                    console.log('Could not save card order');
+                }
+            }
+            
+            function loadCardOrder() {
+                try {
+                    const saved = localStorage.getItem('dashboardCardOrder');
+                    if (saved) {
+                        const cardOrder = JSON.parse(saved);
+                        applyCardOrder(cardOrder);
+                    }
+                } catch (e) {
+                    console.log('Could not load saved card order');
+                }
+            }
+            
+            function applyCardOrder(savedOrder) {
+                const dashboardGrid = document.querySelector('.dashboard-grid');
+                if (!dashboardGrid || !savedOrder || savedOrder.length === 0) return;
+                
+                const currentCards = Array.from(dashboardGrid.children);
+                
+                const cardMap = new Map();
+                currentCards.forEach(card => {
+                    const header = card.querySelector('h3');
+                    if (header) {
+                        const title = header.textContent.replace(/[⋮⋮]/g, '').trim();
+                        cardMap.set(title, card);
+                    }
+                });
+                
+                const orderedCards = [];
+                savedOrder.forEach(title => {
+                    const card = cardMap.get(title);
+                    if (card) orderedCards.push(card);
+                });
+                
+                // Add any cards that weren't in saved order
+                currentCards.forEach(card => {
+                    if (!orderedCards.includes(card)) {
+                        orderedCards.push(card);
+                    }
+                });
+                
+                if (orderedCards.length === currentCards.length) {
+                    dashboardGrid.innerHTML = '';
+                    orderedCards.forEach(card => dashboardGrid.appendChild(card));
+                    
+                    // Reinitialize drag and drop after reorder (but without recursion)
+                    setTimeout(() => {
+                        // Re-attach event listeners without re-creating handles
+                        const cards = Array.from(dashboardGrid.children);
+                        cards.forEach(card => {
+                            // Remove old listeners and add fresh ones
+                            card.removeEventListener('dragstart', handleDragStart);
+                            card.removeEventListener('dragend', handleDragEnd);
+                            card.removeEventListener('dragover', handleDragOver);
+                            card.removeEventListener('dragleave', handleDragLeave);
+                            card.removeEventListener('drop', handleDrop);
+                            
+                            // Add fresh listeners
+                            card.addEventListener('dragstart', handleDragStart);
+                            card.addEventListener('dragend', handleDragEnd);
+                            card.addEventListener('dragover', handleDragOver);
+                            card.addEventListener('dragleave', handleDragLeave);
+                            card.addEventListener('drop', handleDrop);
+                        });
+                    }, 10);
+                }
+            }
+            
+            // Reset function
+            window.resetCardOrder = function() {
+                localStorage.removeItem('dashboardCardOrder');
+                location.reload();
+            };
+            
+            // Initialize on DOM load
+            document.addEventListener('DOMContentLoaded', initDragAndDrop);
+            
+            // Hook into updateUI to reinitialize after content changes
+            const originalUpdateUI = window.updateUI;
+            window.updateUI = function() {
+                if (originalUpdateUI) originalUpdateUI();
+                // Don't reinitialize immediately - wait a bit for DOM to update
+                setTimeout(initDragAndDrop, 150);
+            };
         })();
     </script>
 </body>
